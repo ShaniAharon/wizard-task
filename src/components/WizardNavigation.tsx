@@ -36,7 +36,7 @@ export const WizardNavigation = ({
           {isLastQuestion ? (
             <>
               <CheckCircle className="w-5 h-5" />
-              Complete
+              Done
             </>
           ) : (
             <>

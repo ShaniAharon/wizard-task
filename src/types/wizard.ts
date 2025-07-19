@@ -37,3 +37,8 @@ export interface WizardStepProps {
   onAnswerChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   validationError?: string;
 }
+
+export interface WizardProgressProps {
+  currentIndex: number;
+  totalQuestions: number;
+}

@@ -48,6 +48,7 @@ Validation only triggers after a short delay once the user stops typing.
 
 ## Folder Structure
 
+```
 src/
 ├── assets/ # Project assets.
 ├── components/ # Reusable UI components
@@ -63,7 +64,7 @@ src/
 ├── Dockerfile # Docker config
 ├── nginx.conf # Nginx config for production
 ├── index.html # App entry
-
+```
 ---
 
 ## Running Tests

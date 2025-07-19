@@ -1,100 +1,21 @@
-import {useEffect, useState} from "react";
-import type {WizardAnswers, WizardProps} from "../types/wizard";
-import {
-  getQuestionValidationError,
-  validateQuestion,
-} from "../utils/validation";
+import type {WizardProps} from "../types/wizard";
 import {WizardNavigation} from "./WizardNavigation";
 import {WizardStep} from "./WizardStep";
-import {useDebounce} from "../hooks/useDebounce";
+import {useWizard} from "../hooks/useWizard";
 
-export const Wizard = ({questions}: WizardProps) => {
-  const [answers, setAnswers] = useState<WizardAnswers>({});
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const currentQuestion = questions[currentIndex];
-  const currentAnswer = answers[currentQuestion.id] || "";
-  const isInputValid = validateQuestion(currentQuestion, currentAnswer);
-  const isLastQuestion = currentIndex === questions.length - 1;
-  const [displayValidationError, setDisplayValidationError] = useState("");
-  const canGoBack = currentIndex > 0;
-  const canGoNext = isInputValid;
-  const debouncedAnswer = useDebounce(currentAnswer, 500);
-
-  const shouldSkipQuestion = (questionIndex: number) => {
-    const question = questions[questionIndex];
-    if (!question.skipCondition) return false;
-
-    const {questionId, expectedValue} = question.skipCondition;
-    return answers[questionId]?.toLowerCase() === expectedValue.toLowerCase();
-  };
-
-  const getValidIndex = (fromIndex: number, direction: 1 | -1) => {
-    let nextIndex = fromIndex + direction;
-
-    while (nextIndex >= 0 && nextIndex < questions.length) {
-      if (!shouldSkipQuestion(nextIndex)) return nextIndex;
-      nextIndex += direction;
-    }
-
-    return direction === 1 ? questions.length : -1;
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: e.target.value,
-    }));
-    // Clear validation error when user starts typing
-    if (displayValidationError) {
-      setDisplayValidationError("");
-    }
-  };
-
-  const validateCurrentQuestion = (answer = currentAnswer): boolean => {
-    const isValid = validateQuestion(currentQuestion, answer);
-    let error;
-    if (!isValid) {
-      error = getQuestionValidationError(
-        answer,
-        currentQuestion.validationRules
-      );
-    }
-    setDisplayValidationError(error || "");
-    return isValid;
-  };
-
-  // Debounced validation effect
-  useEffect(() => {
-    if (debouncedAnswer && !displayValidationError) {
-      validateCurrentQuestion(debouncedAnswer);
-    }
-  }, [debouncedAnswer]);
-
-  useEffect(() => {
-    setDisplayValidationError("");
-  }, [currentIndex]);
-
-  const handleNext = () => {
-    if (!validateCurrentQuestion()) {
-      return;
-    }
-    const nextIndex = getValidIndex(currentIndex, 1);
-    if (nextIndex < questions.length) {
-      setCurrentIndex(nextIndex);
-    }
-  };
-
-  const handleBack = () => {
-    const prevIndex = getValidIndex(currentIndex, -1);
-    if (prevIndex >= 0) {
-      setCurrentIndex(prevIndex);
-    }
-  };
-
-  const handleDone = () => {
-    console.log("Wizard completed", answers);
-  };
+export const Wizard = ({questions, onDone}: WizardProps) => {
+  const {
+    currentQuestion,
+    currentAnswer,
+    displayValidationError,
+    canGoBack,
+    canGoNext,
+    isLastQuestion,
+    handleInputChange,
+    handleNext,
+    handleBack,
+    handleDone,
+  } = useWizard({questions, onDone});
 
   if (!questions?.length) {
     return <div>No questions available</div>;

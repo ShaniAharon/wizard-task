@@ -19,6 +19,7 @@ export interface WizardAnswers {
 
 export interface WizardProps {
   questions: Question[];
+  onDone?: (answers: WizardAnswers) => void;
 }
 
 export interface WizardNavigationProps {

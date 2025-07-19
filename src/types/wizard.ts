@@ -20,3 +20,19 @@ export interface WizardAnswers {
 export interface WizardProps {
   questions: Question[];
 }
+
+export interface WizardNavigationProps {
+  canGoBack: boolean;
+  canGoNext: boolean;
+  isLastQuestion: boolean;
+  onBack: () => void;
+  onNext: () => void;
+  onDone: () => void;
+}
+
+export interface WizardStepProps {
+  question: Question;
+  answer: string;
+  onAnswerChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  validationError?: string;
+}

@@ -4,8 +4,7 @@ import {mockQuests} from "./data/mockQuests";
 
 function App() {
   return (
-    <div>
-      <h1>Wizard</h1>
+    <div className="min-h-screen">
       <Wizard questions={mockQuests} />
     </div>
   );

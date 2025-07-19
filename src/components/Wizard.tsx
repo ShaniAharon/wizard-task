@@ -4,6 +4,8 @@ import {
   getQuestionValidationError,
   validateQuestion,
 } from "../utils/validation";
+import {WizardNavigation} from "./WizardNavigation";
+import {WizardStep} from "./WizardStep";
 
 export const Wizard = ({questions}: WizardProps) => {
   const [answers, setAnswers] = useState<WizardAnswers>({});
@@ -14,6 +16,8 @@ export const Wizard = ({questions}: WizardProps) => {
   const isInputValid = validateQuestion(currentQuestion, currentAnswer);
   const isLastQuestion = currentIndex === questions.length - 1;
   const [displayValidationError, setDisplayValidationError] = useState("");
+  const canGoBack = currentIndex > 0;
+  const canGoNext = isInputValid;
 
   const shouldSkipQuestion = (questionIndex: number) => {
     const question = questions[questionIndex];
@@ -34,6 +38,7 @@ export const Wizard = ({questions}: WizardProps) => {
     return direction === 1 ? questions.length : -1;
   };
 
+  //TODO: add debounce to show validation error after user type
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers((prev) => ({
       ...prev,
@@ -81,44 +86,25 @@ export const Wizard = ({questions}: WizardProps) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            {currentQuestion.title}
-          </h2>
-          <p className="text-gray-600 text-lg leading-relaxed max-w-2xl mx-auto mb-6">
-            {currentQuestion.text}
-          </p>
-          <input
-            type="text"
-            value={currentAnswer}
-            onChange={handleInputChange}
-            placeholder="Enter your answer..."
-            className="w-full max-w-2xl p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-gray-100">
+          <div className="min-h-[300px] flex flex-col justify-center">
+            <WizardStep
+              question={currentQuestion}
+              answer={currentAnswer}
+              onAnswerChange={handleInputChange}
+              validationError={displayValidationError}
+            />
+          </div>
+          <WizardNavigation
+            canGoBack={canGoBack}
+            canGoNext={canGoNext}
+            isLastQuestion={isLastQuestion}
+            onBack={handleBack}
+            onNext={handleNext}
+            onDone={handleDone}
           />
-        </div>
-        <span>{displayValidationError && displayValidationError}</span>
-        <div className="mt-6 flex justify-between max-w-2xl mx-auto">
-          {currentIndex > 0 && (
-            <button
-              onClick={handleBack}
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-            >
-              Back
-            </button>
-          )}
-          <button
-            onClick={isLastQuestion ? handleDone : handleNext}
-            disabled={!isInputValid}
-            className={`px-4 py-2 ${
-              isInputValid
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-blue-300 text-white cursor-not-allowed"
-            } rounded-md`}
-          >
-            {isLastQuestion ? "Done" : "Next"}
-          </button>
         </div>
       </div>
     </div>

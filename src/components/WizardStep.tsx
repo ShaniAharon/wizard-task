@@ -10,15 +10,15 @@ export const WizardStep = ({
   return (
     <div className="text-center space-y-6">
       <div className="space-y-4">
-        <h2 className="text-3xl font-bold text-gray-900 leading-tight">
+        <h2 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">
           {question.title}
         </h2>
-        <p className="text-gray-600 text-lg leading-relaxed max-w-2xl mx-auto">
+        <p className="text-gray-600 text-sm md:text-lg leading-relaxed max-w-2xl mx-auto">
           {question.text}
         </p>
       </div>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto relative">
         <input
           type="text"
           value={answer}
@@ -32,7 +32,7 @@ export const WizardStep = ({
         />
 
         {validationError && (
-          <div className="mt-3 flex items-center gap-2 text-red-600 text-sm">
+          <div className="mt-3 flex items-center gap-2 absolute bottom-[-10] text-red-600 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>{validationError}</span>
           </div>

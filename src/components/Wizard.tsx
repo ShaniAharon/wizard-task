@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import type {WizardAnswers, WizardProps} from "../types/wizard";
 import {
   getQuestionValidationError,
@@ -6,6 +6,7 @@ import {
 } from "../utils/validation";
 import {WizardNavigation} from "./WizardNavigation";
 import {WizardStep} from "./WizardStep";
+import {useDebounce} from "../hooks/useDebounce";
 
 export const Wizard = ({questions}: WizardProps) => {
   const [answers, setAnswers] = useState<WizardAnswers>({});
@@ -18,6 +19,7 @@ export const Wizard = ({questions}: WizardProps) => {
   const [displayValidationError, setDisplayValidationError] = useState("");
   const canGoBack = currentIndex > 0;
   const canGoNext = isInputValid;
+  const debouncedAnswer = useDebounce(currentAnswer, 500);
 
   const shouldSkipQuestion = (questionIndex: number) => {
     const question = questions[questionIndex];
@@ -38,31 +40,45 @@ export const Wizard = ({questions}: WizardProps) => {
     return direction === 1 ? questions.length : -1;
   };
 
-  //TODO: add debounce to show validation error after user type
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers((prev) => ({
       ...prev,
       [currentQuestion.id]: e.target.value,
     }));
+    // Clear validation error when user starts typing
+    if (displayValidationError) {
+      setDisplayValidationError("");
+    }
   };
 
-  const validateCurrentQuestion = (): boolean => {
-    const isValid = validateQuestion(currentQuestion, currentAnswer);
+  const validateCurrentQuestion = (answer = currentAnswer): boolean => {
+    const isValid = validateQuestion(currentQuestion, answer);
+    let error;
     if (!isValid) {
-      const error = getQuestionValidationError(
-        currentAnswer,
+      error = getQuestionValidationError(
+        answer,
         currentQuestion.validationRules
       );
-      setDisplayValidationError(error || "");
     }
+    setDisplayValidationError(error || "");
     return isValid;
   };
+
+  // Debounced validation effect
+  useEffect(() => {
+    if (debouncedAnswer && !displayValidationError) {
+      validateCurrentQuestion(debouncedAnswer);
+    }
+  }, [debouncedAnswer]);
+
+  useEffect(() => {
+    setDisplayValidationError("");
+  }, [currentIndex]);
 
   const handleNext = () => {
     if (!validateCurrentQuestion()) {
       return;
     }
-    setDisplayValidationError("");
     const nextIndex = getValidIndex(currentIndex, 1);
     if (nextIndex < questions.length) {
       setCurrentIndex(nextIndex);
@@ -70,7 +86,6 @@ export const Wizard = ({questions}: WizardProps) => {
   };
 
   const handleBack = () => {
-    setDisplayValidationError("");
     const prevIndex = getValidIndex(currentIndex, -1);
     if (prevIndex >= 0) {
       setCurrentIndex(prevIndex);

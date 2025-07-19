@@ -81,7 +81,7 @@ npm run test
 1. Clone & Install:
 
 ```bash
-git clone https://github.com/your-username/wizard-task.git
+git clone https://github.com/ShaniAharon/wizard-task.git
 cd wizard-task
 npm install
 ```

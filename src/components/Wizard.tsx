@@ -1,5 +1,9 @@
 import {useState} from "react";
 import type {WizardAnswers, WizardProps} from "../types/wizard";
+import {
+  getQuestionValidationError,
+  validateQuestion,
+} from "../utils/validation";
 
 export const Wizard = ({questions}: WizardProps) => {
   const [answers, setAnswers] = useState<WizardAnswers>({});
@@ -9,6 +13,7 @@ export const Wizard = ({questions}: WizardProps) => {
   const currentAnswer = answers[currentQuestion.id] || "";
   const isInputValid = currentAnswer.trim() !== "";
   const isLastQuestion = currentIndex === questions.length - 1;
+  const [displayValidationError, setDisplayValidationError] = useState("");
 
   const shouldSkipQuestion = (questionIndex: number) => {
     const question = questions[questionIndex];
@@ -36,7 +41,23 @@ export const Wizard = ({questions}: WizardProps) => {
     }));
   };
 
+  const validateCurrentQuestion = (): boolean => {
+    const isValid = validateQuestion(currentQuestion, currentAnswer);
+    if (!isValid) {
+      const error = getQuestionValidationError(
+        currentAnswer,
+        currentQuestion.validationRules
+      );
+      setDisplayValidationError(error || "");
+    }
+    return isValid;
+  };
+
   const handleNext = () => {
+    if (!validateCurrentQuestion()) {
+      return;
+    }
+    setDisplayValidationError("");
     const nextIndex = getValidIndex(currentIndex, 1);
     if (nextIndex < questions.length) {
       setCurrentIndex(nextIndex);
@@ -44,6 +65,7 @@ export const Wizard = ({questions}: WizardProps) => {
   };
 
   const handleBack = () => {
+    setDisplayValidationError("");
     const prevIndex = getValidIndex(currentIndex, -1);
     if (prevIndex >= 0) {
       setCurrentIndex(prevIndex);
@@ -76,6 +98,7 @@ export const Wizard = ({questions}: WizardProps) => {
             className="w-full max-w-2xl p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+        <span>{displayValidationError && displayValidationError}</span>
         <div className="mt-6 flex justify-between max-w-2xl mx-auto">
           {currentIndex > 0 && (
             <button

@@ -11,7 +11,7 @@ export const Wizard = ({questions}: WizardProps) => {
 
   const currentQuestion = questions[currentIndex];
   const currentAnswer = answers[currentQuestion.id] || "";
-  const isInputValid = currentAnswer.trim() !== "";
+  const isInputValid = validateQuestion(currentQuestion, currentAnswer);
   const isLastQuestion = currentIndex === questions.length - 1;
   const [displayValidationError, setDisplayValidationError] = useState("");
 
